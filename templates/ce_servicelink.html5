@@ -1,0 +1,51 @@
+<div class="<?= $this->class ?> block"<?= $this->cssID ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
+<div class="service-link-wrapper">
+
+    <div class="block service-link-icon">
+        <span class="fa <?php echo $this->faIcon . ' ' . $this->iconClass; ?>"></span>
+    </div>
+
+    <!-- rounded icons
+    <span class="fa-stack fa-lg">
+      <i class="fa fa-circle fa-stack-2x"></i>
+      <i class="fa <?php echo $this->faIcon; ?> fa-stack-1x fa-inverse"></i>
+    </span>
+    -->
+
+    <<?php echo $this->hl; ?> class="service-link-headline">
+        <?php echo $this->headline; ?>
+    </<?php echo $this->hl; ?>>
+
+    <div class="service-link-text">
+        <?php echo $this->serviceLinkText; ?>
+    </div>
+
+    <?php if ($this->buttonJumpTo): ?>
+    <div class="service-link-button">
+        <a href="<?php echo $this->buttonJumpTo; ?>" class="<?php echo $this->buttonClass; ?>"><?php echo $this->buttonText; ?></a>
+    </div>
+    <?php endif; ?>
+
+ </div>
+</div>
+<script>
+    (function($){
+        $().ready(function() {
+            $('#serviceLink<?php echo $this->id; ?>').on('click', function(event){
+                event.preventDefault();
+                event.stopPropagation();
+                var link = $('#'+ this.id + ' .service-link-button a');
+                if(link.prop('href')){
+                    window.location.href = link.prop('href');
+                }
+            });
+            $('#serviceLink<?php echo $this->id; ?>').on('mousenter', function(event){
+               this.css('cursor', 'pointer');
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        });
+    })(jQuery);
+</script>
+
+
