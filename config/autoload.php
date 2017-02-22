@@ -25,7 +25,6 @@ ClassLoader::addClasses(array
 (
 	// Src
 	'MCupic\HeadlineExtended' => 'system/modules/mcupic_elements/src/elements/HeadlineExtended.php',
-	'MCupic\ServiceLink'      => 'system/modules/mcupic_elements/src/elements/ServiceLink.php',
 ));
 
 
@@ -35,5 +34,4 @@ ClassLoader::addClasses(array
 TemplateLoader::addFiles(array
 (
 	'ce_headline_extended' => 'system/modules/mcupic_elements/templates',
-	'ce_servicelink'       => 'system/modules/mcupic_elements/templates',
 ));
