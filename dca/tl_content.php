@@ -119,38 +119,31 @@ class ce_serviceLink extends Backend
             }
         }
         // Load Font Awesome
-        $GLOBALS['TL_CSS'][] = "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css";
-
+        $GLOBALS['TL_CSS'][] = "https://maxcdn.bootstrapcdn.com/font-awesome/" . SERVICE_LINK_FONTAWESOME_VERSION. "/css/font-awesome.min.css";
+        $arrFaIds = $this->getFaIds();
         // Build radio-button-list
         $html = '<fieldset id="ctrl_faIcon" class="tl_radio_container">';
         $html .= '<h3><label>Icon picker</label></h3>';
 
-        $html .= '<div id="iconBox" style="border:1px solid #aaa;height:400px;overflow: scroll;">';
-        $html .= '<table>';
+        $html .= '<div id="iconBox" style="border:1px solid #aaa;height:600px;overflow: scroll;">';
+        $html .= '<div style="position:relative;display:flex;flex-wrap:wrap">';
         $i = 0;
-        $m = 0;
-        foreach ($GLOBALS['font-awesome-classes'] as $strClass)
+        foreach ($arrFaIds as $strClass)
         {
-            if ($i == 0)
+            $checked = $cssClass = $color = $bgcolor = '';
+            if($dc->activeRecord->faIcon == 'fa-' . $strClass)
             {
-                $html .= '<tr>';
+                $checked = ' checked="checked"';
+                $cssClass = ' class="checked"';
+                $color = 'color:#fff;';
+                $bgcolor = 'background-color:#ebfdd7;';
             }
-            $checked = $dc->activeRecord->faIcon == $strClass ? ' checked="checked"' : '';
-            $cssClass = $dc->activeRecord->faIcon == $strClass ? ' class="checked"' : '';
-            $color = $dc->activeRecord->faIcon == $strClass ? 'color:#fff;' : '';
-            $bgcolor = $dc->activeRecord->faIcon == $strClass ? 'background-color:#bbb;' : '';
 
-            $html .= '<td style="line-height:2em;padding:5px;' . $bgcolor . $color . '"><input' . $cssClass . ' id="faIcon_' . $m . '" type="radio" name="faIcon" value="' . $strClass . '"' . $checked . '><span class="fa fa-2x ' . $strClass . '"></span> <span>' . $strClass . '</span></td>';
+            $html .= '<div style="width:22%;line-height:2em;padding:5px;' . $bgcolor . $color . '" title="fa-' . $strClass . '" class="font-awesome-icon-item" data-faClass="fa-' . $strClass . '"><input' . $cssClass . ' id="faIcon_' . $i . '" type="radio" name="faIcon" style="display:inline-block;margin-right:4px;" value="fa-' . $strClass . '"' . $checked . '><span style="display:inline-block; color:#333;" class="fa fa-2x fa-fw ' . 'fa-' . $strClass . '"></span> <div style="display:inline-block;margin-left:4px;">' . StringUtil::substr($strClass, 15) . '</div></div>';
 
             $i++;
-            if ($i == 4)
-            {
-                $html .= '</tr>';
-                $i = 0;
-            }
-            $m++;
         }
-        $html .= '</table>';
+        $html .= '</div>';
         $html .= '</div>';
         $html .= '<p class="tl_help tl_tip" title="">' . $GLOBALS['TL_LANG']['tl_content']['faIcon'][1] . '</p>';
 
@@ -158,26 +151,76 @@ class ce_serviceLink extends Backend
         $html .= '
         <script>
             window.addEvent("domready", function(event) {
-                var myFx = new Fx.Scroll(document.id("iconBox")).toElement( $$("input.checked")[0]);
+                if($$("input.checked").length){
+                    // Scroll to selected icon
+                    var myFx = new Fx.Scroll(document.id("iconBox")).toElement($$("input.checked")[0]);
+                }
                 $$("#iconBox input").addEvent("click", function(event){
                     $$("#iconBox input").each(function(el){
                         el.removeClass("checked");
-                        el.getParent("td").setStyles({
+                        el.getParent("div").setStyles({
                             "background-color": "inherit",
                             "color": "inherit"
                         });
                     });
-                    this.getParent("td").setStyles({
-                        "background-color": "#bbb",
-                        "color": "#fff"
+                    this.getParent("div").setStyles({
+                        "background-color": "#ebfdd7"
                     });
-
                 });
+
+                // Creating the filter input
+                var filterInput = new Element("input", {
+                    "type": "text",
+                    "placeholder": "filter",
+                    "class": "tl_text fa-class-filter",
+                    id: "faClassFilter",
+                    events: {
+                        input: function(){
+                            var strFilter = this.getProperty("value").trim(" ");
+                            var itemCollection = $$(".font-awesome-icon-item");
+                            itemCollection.each(function(el){
+                                el.setStyle("display","block");
+                                if(strFilter != "")
+                                {
+                                    if(el.getProperty("data-faClass").contains(strFilter) === false)
+                                    {
+                                        el.setStyle("display","none");
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                // Add a label
+                filterInput.inject("ctrl_faIcon", "before");
+                var elLabel = Elements.from("<label><h3>' . $GLOBALS['TL_LANG']['tl_content']['faIconFilter'] . '</h3></label>");
+                elLabel.inject("faClassFilter", "before");
+
+
             });
         </script>
         ';
 
         return $html;
+
+    }
+
+    /**
+     * Get all FontAwesomeClasses as array from icons.yml
+     * Download this file at:
+     * https://raw.githubusercontent.com/FortAwesome/Font-Awesome/v4.7.0/src/3.2.1/icons.yml
+     * @return array
+     */
+    protected function getFaIds()
+    {
+        $ymlFileSRC = dirname(__DIR__) . '/yml/icons.yml';
+        $strYml = file_get_contents($ymlFileSRC);
+        $pattern = '/id:([\s]*)(.*)([\s]*)/';
+        if(preg_match_all ($pattern, $strYml, $matches))
+        {
+            return $matches[2];
+        }
+        return array();
 
     }
 
